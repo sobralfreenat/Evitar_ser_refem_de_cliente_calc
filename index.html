@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Clientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #1f4343; /* Correção da cor */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #008686;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .modal {
+            display: none; /* Oculto por padrão */
+            position: fixed; /* Fixo */
+            z-index: 1; /* Fica acima */
+            left: 0;
+            top: 0;
+            width: 100%; /* Largura total */
+            height: 100%; /* Altura total */
+            overflow: auto; /* Permite rolagem se necessário */
+            background-color: rgb(0,0,0); /* Cor de fundo */
+            background-color: rgba(0,0,0,0.4); /* Fundo escuro com transparência */
+            padding-top: 60px; /* Espaço acima do modal */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 15% do topo e centraliza */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Largura do modal */
+            border-radius: 4px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <br><img src="https://d1yei2z3i6k35z.cloudfront.net/3119789/66468353e4e6d_FNWfreenatstoreLogodownload.jpg" alt="Logo FNW" style="display: block; margin: 0 auto; max-width: 10%; height: auto;"><br><br>
+
+    <h1>Cálculo para não ser refém de Clientes</h1> <!-- Adicionado h1 -->
+ 
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" placeholder="Digite seu nome" required>
+
+    <label for="email">Email :</label>
+    <input type="text" id="email" placeholder="Digite seu email" required>
+
+    <label for="custos">Custo Mensal da Empresa (R$):</label>
+    <input type="number" id="custos" placeholder="Digite os custos mensais" required>
+
+    <label for="lucro">Lucro Líquido Almejado (R$):</label>
+    <input type="number" id="lucro" placeholder="Digite o lucro líquido almejado" required>
+
+    <label for="margem">Margem de Lucro (%):</label>
+    <input type="number" id="margem" placeholder="Digite a margem de lucro" required>
+
+    <label for="periodo">Período de Tempo (Meses):</label>
+    <input type="number" id="periodo" value="12" required>
+
+    <label for="clientes">Número de Clientes a Atender:</label>
+    <select id="clientes">
+        <option value="7">7 Clientes</option>
+        <option value="14">14 Clientes</option>
+        <option value="21" selected>21 Clientes</option>
+    </select>
+
+    <button onclick="calcular()">Calcular</button>
+    <button id="infoCalcBtn">Info Cálculo</button>
+    
+    <div class="result" id="resultado" style="display:none;"></div><br><br>
+    <button onclick="salvarDados()">Salvar JSON</button>
+    <button onclick="carregarDados()">Carregar JSON</button>
+
+    <!-- Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h2>Como os Cálculos São Feitos</h2>
+            <p><strong>Custo Total a Cobrir:</strong> É a soma do Custo Mensal da Empresa e do Lucro Almejado.</p>
+            <p><strong>Limite por Cliente (Custo Mensal):</strong> É o custo mensal dividido pelo número de clientes.</p>
+            <p><strong>Limite por Cliente (Lucro Necessário):</strong> É o lucro almejado dividido pelo número de clientes.</p>
+            <p><strong>Limite por Cliente (Considerando Margem de Lucro):</strong> É o custo total a cobrir dividido pelo número de clientes.</p>
+            <p><strong>Ticket Médio Necessário por Cliente:</strong> É o custo total a cobrir dividido pelo número de clientes.</p>
+            <h3>Explicações Adicionais</h3>
+            <p><strong>Ticket Médio:</strong> O ticket médio necessário por cliente é o valor que cada cliente deve pagar para que você alcance o lucro desejado. Isso é importante para que você não fique refém de um número limitado de clientes, garantindo que a receita seja suficiente para cobrir seus custos e gerar lucro.</p>
+            <p><strong>Valor das Parcelas:</strong> O valor das parcelas é calculado dividindo o custo total a cobrir pelo número de meses do contrato (neste caso, 12 meses). Isso significa que, para manter a saúde financeira da empresa, você deve garantir que cada cliente pague pelo menos esse valor mensalmente.</p>
+            <p><strong>Valor Médio da Consultoria no Mercado:</strong> O valor médio da consultoria varia bastante, mas normalmente fica entre R$ 1.000 a R$ 5.000 por mês, dependendo da área de atuação e da complexidade do serviço prestado. É importante pesquisar e ajustar seu preço de acordo com o mercado e o valor que você oferece.</p>
+        </div>
+    </div>
+
+    <script>
+        function calcular() {
+            const custos = parseFloat(document.getElementById('custos').value);
+            const lucro = parseFloat(document.getElementById('lucro').value);
+            const margem = parseFloat(document.getElementById('margem').value) / 100;
+            const periodo = parseInt(document.getElementById('periodo').value);
+            const numeroClientes = parseInt(document.getElementById('clientes').value);
+
+            const custoTotal = custos + lucro;
+            const limitePorClienteCusto = custos / numeroClientes;
+            const limitePorClienteLucro = lucro / numeroClientes;
+            const limitePorClienteMargem = custoTotal / numeroClientes;
+            const ticketMedio = custoTotal / numeroClientes;
+
+            // Calcular o número necessário de clientes para atingir o lucro desejado
+            const clientesNecessarios = Math.ceil(custoTotal / (limitePorClienteCusto + limitePorClienteLucro));
+            const clientesFaltando = Math.max(0, clientesNecessarios - numeroClientes);
+
+            // Calcular o valor das parcelas para um contrato de 12 meses
+            const valorParcelas = custoTotal / 12;
+
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.style.display = 'block';
+            resultadoDiv.innerHTML = `
+                <h3>Resultados do Cálculo</h3>
+                <p><strong>Custo Total a Cobrir:</strong> R$ ${custoTotal.toFixed(2)}</p>
+                <p><strong>Limite por Cliente (Custo Mensal):</strong> R$ ${limitePorClienteCusto.toFixed(2)}</p>
+                <p><strong>Limite por Cliente (Lucro Necessário):</strong> R$ ${limitePorClienteLucro.toFixed(2)}</p>
+                <p><strong>Limite por Cliente (Considerando Margem de Lucro):</strong> R$ ${limitePorClienteMargem.toFixed(2)}</p>
+                <p><strong>Ticket Médio Necessário por Cliente:</strong> R$ ${ticketMedio.toFixed(2)}</p>
+                <p><strong>Clientes Faltando para Atingir o Lucro Desejado:</strong> ${clientesFaltando}</p>
+                <p><strong>Valor das Parcelas (12 Meses):</strong> R$ ${valorParcelas.toFixed(2)}</p>
+            `;
+        }
+
+        function salvarDados() {
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const custos = document.getElementById('custos').value;
+            const lucro = document.getElementById('lucro').value;
+            const margem = document.getElementById('margem').value;
+            const periodo = document.getElementById('periodo').value;
+            const numeroClientes = document.getElementById('clientes').value;
+
+            const dados = {
+                nome: nome,
+                email: email,
+                custos: custos,
+                lucro: lucro,
+                margem: margem,
+                periodo: periodo,
+                numeroClientes: numeroClientes,
+                dataHora: new Date().toISOString()
+            };
+
+            const json = JSON.stringify(dados);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `FNW_Protecao_${nome}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function carregarDados() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = event => {
+                    const dados = JSON.parse(event.target.result);
+                    document.getElementById('nome').value = dados.nome;
+                    document.getElementById('email').value = dados.email;
+                    document.getElementById('custos').value = dados.custos;
+                    document.getElementById('lucro').value = dados.lucro;
+                    document.getElementById('margem').value = dados.margem;
+                    document.getElementById('periodo').value = dados.periodo;
+                    document.getElementById('clientes').value = dados.numeroClientes;
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Modal
+        const modal = document.getElementById("infoModal");
+        const infoCalcBtn = document.getElementById("infoCalcBtn");
+
+        infoCalcBtn.onclick = function() {
+            modal.style.display = "block"; // Abertura do modal
+        }
+
+        function fecharModal() {
+            modal.style.display = "none"; // Fechamento do modal
+        }
+
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none"; // Fechamento ao clicar fora
+            }
+        }
+    </script>
+</body>
+</html>
